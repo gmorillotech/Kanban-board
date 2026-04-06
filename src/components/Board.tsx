@@ -9,15 +9,18 @@ import {
 } from '@dnd-kit/core'
 import { COLUMNS,type Status, type Priority, type Task} from '../types'
 import { useTasks } from '../hooks/useTasks'
+import { useLabels} from '../hooks/useLabels'
 import Column from './Column'
 import CreateTaskModal from './CreateTaskModal'
 import TaskDetailPanel from './TaskDetailPanel'
 
 export default function Board() {
-  const { tasks, loading, error, createTask, updateTaskStatus, updateTask, deleteTask } = useTasks()
+  const { tasks, loading, error, createTask, updateTaskStatus, updateTask, deleteTask, refreshTasks } = useTasks()
   const [showModal, setShowModal] = useState(false)
   const [search, setSearch] = useState('')
+  const { labels } = useLabels()
   const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all')
+  const [labelFilter, setLabelFilter] = useState<string | 'all'>('all')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   const sensors = useSensors(
@@ -49,7 +52,8 @@ export default function Board() {
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(search.toLowerCase())
     const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter
-    return matchesSearch && matchesPriority})
+    const matchesLabel = labelFilter === 'all' || task.labels?.some(l => l.id === labelFilter)
+    return matchesSearch && matchesPriority && matchesLabel})
 
   const totalTasks = tasks.length
   const doneTasks = tasks.filter(t => t.status === 'done').length
@@ -141,10 +145,25 @@ export default function Board() {
         <option value="low">Low</option>
     </select>
 
+    {/* Label filter */}
+    {labels.length > 0 &&(
+      <select
+        value={labelFilter}
+        onChange={e => setLabelFilter(e.target.value)}
+        className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-transparent text-gray-600"
+      >
+        <option value="all">All labels</option>
+        {labels.map(label => (
+        <option key={label.id} value={label.id}>{label.name}</option>
+      ))}
+      </select>
+    )}
+
+
     {/* Clear filters */}
     {(search || priorityFilter !== 'all') && (
         <button
-        onClick={() => { setSearch(''); setPriorityFilter('all') }}
+        onClick={() => { setSearch(''); setPriorityFilter('all'); setLabelFilter('all')}}
         className="text-xs text-brand-500 hover:text-brand-600 font-medium"
         >
         Clear filters
@@ -168,7 +187,7 @@ export default function Board() {
               onDelete={deleteTask}
               onAddTask={() => setShowModal(true)}
               onOpen={setSelectedTask}
-              isFiltering={search !== '' || priorityFilter !== 'all'}
+              isFiltering={search !== '' || priorityFilter !== 'all' || labelFilter !== 'all'}
             />
           ))}
         </div>
@@ -182,6 +201,7 @@ export default function Board() {
             const updated = await updateTask(id, updates)
             setSelectedTask(updated)
           }}
+          onLabelsChanged={refreshTasks}
         />
       )}
 

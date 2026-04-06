@@ -11,17 +11,28 @@ export function useTasks() {
         fetchTasks()
 
     }, [])
+
     async function fetchTasks() {
         try{
             setLoading(true)
             const {data, error} = await supabase
                 .from('tasks')
-                .select('*')
-                .order('created_at', {ascending: true})
+                .select(`
+                *,
+                task_labels(
+                    labels(*)
+                )
+            `)
+            .order('created_at', { ascending: true })
                 
             if(error) throw error
-            setTasks(data || [])
 
+            const tasks = (data || []).map((task:any) => ({
+                ...task,
+                labels: (task.task_labels || []).map((tl:any) => tl.labels)
+            }))
+
+            setTasks(tasks)
         } catch(err: any) {
             setError(err.message)
         } finally {
@@ -91,6 +102,6 @@ export function useTasks() {
         if(error) throw error
         setTasks(prev => prev.filter(t => t.id !== id))
     }
-    return {tasks, loading, error, createTask, updateTaskStatus, updateTask, deleteTask}
+    return {tasks, loading, error, createTask, updateTaskStatus, updateTask, deleteTask, refreshTasks: fetchTasks}
 
 }

@@ -83,6 +83,18 @@ export default function TaskCard({ task, onDelete, onOpen }: Props) {
             {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
         )}
+        {task.labels && task.labels.length > 0 && task.labels.map(label => (
+          <span
+              key={label.id}
+              className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+              style={{
+              backgroundColor: label.color + '20',
+              color: label.color,
+              }}
+            >
+            {label.name}
+          </span>
+        ))}
       </div>
     </div>
   )

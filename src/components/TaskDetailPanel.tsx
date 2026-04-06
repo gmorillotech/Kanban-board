@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useComments } from '../hooks/useComments'
 import type { Task, Priority, Status } from '../types'
+import LabelManager from './LabelManager'
 
 const PRIORITY_STYLES = {
   high:   'bg-red-50 text-red-600',
@@ -25,6 +26,7 @@ interface Props {
     due_date?: string
     status?: Status
   }) => Promise<void>
+  onLabelsChanged: () => void
 }
 
 function timeAgo(dateStr: string) {
@@ -38,7 +40,7 @@ function timeAgo(dateStr: string) {
   return `${days}d ago`
 }
 
-export default function TaskDetailPanel({ task, onClose, onUpdate }: Props) {
+export default function TaskDetailPanel({ task, onClose, onUpdate, onLabelsChanged }: Props) {
   const { comments, loading, addComment, deleteComment } = useComments(task.id)
   const [input, setInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -199,6 +201,11 @@ export default function TaskDetailPanel({ task, onClose, onUpdate }: Props) {
               {task.description || <span className="text-gray-300">No description</span>}
             </p>
           )}
+        </div>
+
+        {/* Labels */}
+        <div className="px-6 py-4 border-b border-gray-50">
+          <LabelManager taskId={task.id} onLabelsChanged={onLabelsChanged} />
         </div>
 
         {/* Comments */}

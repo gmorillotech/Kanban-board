@@ -14,7 +14,7 @@ import CreateTaskModal from './CreateTaskModal'
 import TaskDetailPanel from './TaskDetailPanel'
 
 export default function Board() {
-  const { tasks, loading, error, createTask, updateTaskStatus, deleteTask } = useTasks()
+  const { tasks, loading, error, createTask, updateTaskStatus, updateTask, deleteTask } = useTasks()
   const [showModal, setShowModal] = useState(false)
   const [search, setSearch] = useState('')
   const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all')
@@ -178,6 +178,10 @@ export default function Board() {
         <TaskDetailPanel
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
+          onUpdate={async (id, updates) =>{
+            const updated = await updateTask(id, updates)
+            setSelectedTask(updated)
+          }}
         />
       )}
 

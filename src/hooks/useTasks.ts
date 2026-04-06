@@ -11,7 +11,6 @@ export function useTasks() {
         fetchTasks()
 
     }, [])
-
     async function fetchTasks() {
         try{
             setLoading(true)
@@ -63,6 +62,25 @@ export function useTasks() {
         if(error) throw error
         setTasks(prev => prev.map(t => t.id === id ? {...t, status} : t))
     }
+    
+    async function updateTask(id: string, updates: {
+        title?: string
+        description?: string
+        priority?: Priority
+        due_date?: string
+        status?: Status
+    }) {
+        const {data, error} = await supabase
+            .from('tasks')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single()
+
+        if(error) throw error
+        setTasks(prev => prev.map(t => t.id === id ? {...t, ...data} : t))
+        return data
+    }
 
     async function deleteTask(id: string){
         const {error} = await supabase
@@ -73,6 +91,6 @@ export function useTasks() {
         if(error) throw error
         setTasks(prev => prev.filter(t => t.id !== id))
     }
-    return {tasks, loading, error, createTask, updateTaskStatus, deleteTask}
+    return {tasks, loading, error, createTask, updateTaskStatus, updateTask, deleteTask}
 
 }

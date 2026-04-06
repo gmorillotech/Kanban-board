@@ -21,9 +21,10 @@ interface Props {
   tasks: Task[]
   onDelete: (id: string) => void
   onAddTask: () => void
+  isFiltering?: boolean
 }
 
-export default function Column({ id, label, tasks, onDelete, onAddTask }: Props) {
+export default function Column({ id, label, tasks, onDelete, onAddTask, isFiltering }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id })
   const cfg = COLUMN_CONFIG[id]
 
@@ -55,7 +56,8 @@ export default function Column({ id, label, tasks, onDelete, onAddTask }: Props)
 
         {tasks.length === 0 && (
           <div className="flex-1 flex items-center justify-center min-h-[120px]">
-            <p className="text-xs text-gray-200">Drop tasks here</p>
+            <p className="text-xs text-gray-200">
+              {isFiltering ? 'No matches': 'Drop tasks here'}</p>
           </div>
         )}
       </div>

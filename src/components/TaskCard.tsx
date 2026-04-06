@@ -1,3 +1,4 @@
+import { useState} from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types'
@@ -5,17 +6,20 @@ import type { Task } from '../types'
 const PRIORITY_STYLES = {
   high: 'bg-red-50 text-red-600',
   medium: 'bg-blue-50 text-blue-600',
-  low: 'bg-gray-100 text-gray-600',
+  low: 'bg-gray-100 text-gray-500',
 }
 
 interface Props {
   task: Task
   onDelete: (id: string) => void
+  onOpen: (task: Task) => void
 }
 
-export default function TaskCard({ task, onDelete }: Props) {
+export default function TaskCard({ task, onDelete, onOpen }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id })
+
+    const [dragMoved, setDragMoved] = useState(false)
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -32,6 +36,9 @@ export default function TaskCard({ task, onDelete }: Props) {
       style={style}
       {...attributes}
       {...listeners}
+      onMouseDown={() => setDragMoved(false)}
+      onMouseMove={() => setDragMoved(true)}
+      onMouseUp={() => { if (!dragMoved && !isDragging) onOpen(task) }}
       className={`
         relative bg-white rounded-xl p-3 border cursor-grab active:cursor-grabbing group
         transition-shadow hover:card-shadow-hover
@@ -51,6 +58,7 @@ export default function TaskCard({ task, onDelete }: Props) {
         </p>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(task.id) }}
+          onMouseDown={(e) => e.stopPropagation()}
           className="opacity-0 group-hover:opacity-100 text-gray-200 hover:text-red-400 transition-all shrink-0 text-xs mt-0.5"
         >
           ✕

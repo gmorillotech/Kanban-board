@@ -21,10 +21,11 @@ interface Props {
   tasks: Task[]
   onDelete: (id: string) => void
   onAddTask: () => void
+  onOpen: (task: Task) => void
   isFiltering?: boolean
 }
 
-export default function Column({ id, label, tasks, onDelete, onAddTask, isFiltering }: Props) {
+export default function Column({ id, label, tasks, onDelete, onAddTask, onOpen, isFiltering }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id })
   const cfg = COLUMN_CONFIG[id]
 
@@ -50,7 +51,7 @@ export default function Column({ id, label, tasks, onDelete, onAddTask, isFilter
       >
         <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map(task => (
-            <TaskCard key={task.id} task={task} onDelete={onDelete} />
+            <TaskCard key={task.id} task={task} onDelete={onDelete} onOpen={onOpen} />
           ))}
         </SortableContext>
 

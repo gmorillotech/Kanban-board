@@ -7,16 +7,18 @@ import {
   useSensors,
   closestCorners,
 } from '@dnd-kit/core'
-import { COLUMNS,type Status, type Priority } from '../types'
+import { COLUMNS,type Status, type Priority, type Task} from '../types'
 import { useTasks } from '../hooks/useTasks'
 import Column from './Column'
 import CreateTaskModal from './CreateTaskModal'
+import TaskDetailPanel from './TaskDetailPanel'
 
 export default function Board() {
   const { tasks, loading, error, createTask, updateTaskStatus, deleteTask } = useTasks()
   const [showModal, setShowModal] = useState(false)
   const [search, setSearch] = useState('')
   const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all')
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -82,7 +84,7 @@ export default function Board() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">My Board</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{today} tasks</p>
+          <p className="text-sm text-gray-400 mt-0.5">{today}</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -165,11 +167,19 @@ export default function Board() {
               tasks={filteredTasks.filter(t => t.status === col.id)}
               onDelete={deleteTask}
               onAddTask={() => setShowModal(true)}
+              onOpen={setSelectedTask}
               isFiltering={search !== '' || priorityFilter !== 'all'}
             />
           ))}
         </div>
       </DndContext>
+
+      {selectedTask && (
+        <TaskDetailPanel
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
 
       {showModal && (
         <CreateTaskModal
